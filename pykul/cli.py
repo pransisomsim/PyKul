@@ -2,26 +2,31 @@
 """CLI runner for .http files. Kulala-style, Termux-friendly.
 
 Usage:
-    python3 cli.py requests.http -l                # list requests
-    python3 cli.py requests.http -i 2               # run request #2
-    python3 cli.py requests.http -n "create user"   # run by name (partial match)
-    python3 cli.py requests.http                    # run if file has only 1 request
+    pykul requests.http -l                 # list requests
+    pykul requests.http -i 2                # run request #2
+    pykul requests.http -n "create user"    # run by name (partial match)
+    pykul requests.http --line 42           # run the request containing line 42 (editor integration)
+    pykul requests.http                     # runs automatically if file has only 1 request
+    pykul requests.http --verbose           # show all response headers, not just the important ones
 """
 import argparse
 import sys
 
-from parser import parse_file
-from runner import execute
-from formatter import pretty_print
+from . import __version__
+from .parser import parse_file, find_request_at_line
+from .runner import execute
+from .formatter import pretty_print
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Simple .http request runner")
+    ap = argparse.ArgumentParser(prog="pykul", description="A lightweight, Kulala-inspired HTTP client for the terminal")
     ap.add_argument("file", help="Path to .http file")
     ap.add_argument("-l", "--list", action="store_true", help="List all requests in the file")
     ap.add_argument("-n", "--name", help="Run request by name (partial match)")
     ap.add_argument("-i", "--index", type=int, help="Run request by index (1-based)")
+    ap.add_argument("--line", type=int, help="Run the request nearest to this line number (for editor integration)")
     ap.add_argument("--verbose", action="store_true", help="Print all response headers instead of just the important ones")
+    ap.add_argument("--version", action="version", version=f"pykul {__version__}")
 
     args = ap.parse_args()
 
@@ -37,11 +42,16 @@ def main():
 
     if args.list:
         for i, req in enumerate(requests_list, 1):
-            print(f"{i}. {req.name}  [{req.method} {req.url}]")
+            print(f"{i}. {req.name}  [{req.method} {req.url}]  (line {req.line})")
         return
 
     target = None
-    if args.index:
+    if args.line is not None:
+        target = find_request_at_line(requests_list, args.line)
+        if target is None:
+            print(f"No request found at or before line {args.line}.")
+            sys.exit(1)
+    elif args.index:
         if 1 <= args.index <= len(requests_list):
             target = requests_list[args.index - 1]
         else:
@@ -57,7 +67,7 @@ def main():
         if len(requests_list) == 1:
             target = requests_list[0]
         else:
-            print("Multiple requests found. Use -l to list, then -n NAME or -i INDEX to run one.")
+            print("Multiple requests found. Use -l to list, then -n NAME, -i INDEX, or --line N to run one.")
             for i, req in enumerate(requests_list, 1):
                 print(f"{i}. {req.name}")
             sys.exit(1)
@@ -73,4 +83,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

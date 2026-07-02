@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pykul"
+version = "0.1.0"
+description = "A lightweight, Kulala-inspired HTTP client for the terminal — built for Termux and Neovim workflows."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "pransisomsim" }]
+keywords = ["http", "cli", "rest-client", "termux", "neovim", "api-testing"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "requests>=2.25",
+]
+
+[project.optional-dependencies]
+pretty = ["rich>=13.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+pykul = "pykul.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/pransisomsim/PyKul"
+Issues = "https://github.com/pransisomsim/PyKul/issues"
+
+[tool.setuptools.packages.find]
+include = ["pykul*"]
