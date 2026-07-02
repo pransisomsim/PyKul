@@ -1,0 +1,20 @@
+@baseUrl = https://jsonplaceholder.typicode.com
+@token = fake-token-123
+
+### Get all posts
+GET {{baseUrl}}/posts/1
+
+### Get a user
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+### Create a post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "title": "hello",
+  "body": "testing my own http client",
+  "userId": 1
+}
+
