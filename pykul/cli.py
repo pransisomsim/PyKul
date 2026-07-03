@@ -27,6 +27,12 @@ def main():
     ap.add_argument("--line", type=int, help="Run the request nearest to this line number (for editor integration)")
     ap.add_argument("--verbose", action="store_true", help="Print all response headers instead of just the important ones")
     ap.add_argument("--version", action="version", version=f"pykul {__version__}")
+    ap.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy the response body to the clipboard",
+    )
 
     args = ap.parse_args()
 
@@ -78,7 +84,7 @@ def main():
         print(f"Request failed: {e}")
         sys.exit(1)
 
-    pretty_print(response, elapsed, target, verbose=args.verbose)
+    pretty_print(response, elapsed, target, verbose=args.verbose, copy=args.copy)
 
 
 if __name__ == "__main__":

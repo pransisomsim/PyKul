@@ -9,6 +9,12 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
 
+try:
+    import pyperclip
+    CLIPBOARD_AVAILABLE = True
+except ImportError:
+    CLIPBOARD_AVAILABLE = False
+
 IMPORTANT_HEADERS = [
     "Content-Type",
     "Content-Length",
@@ -25,7 +31,7 @@ def filter_headers(headers):
     return [lookup[name.lower()] for name in IMPORTANT_HEADERS if name.lower() in lookup]
 
 
-def pretty_print(response, elapsed, req, verbose=False):
+def pretty_print(response, elapsed, req, verbose=False, copy=False):
     status_line = f"{req.method} {req.url} -> {response.status_code} {response.reason} ({elapsed * 1000:.0f}ms)"
     content_type = response.headers.get("Content-Type", "")
 
@@ -33,9 +39,19 @@ def pretty_print(response, elapsed, req, verbose=False):
     is_json = "application/json" in content_type
     if is_json:
         try:
-            body_text = json.dumps(response.json(), indent=2)
+            body_text = json.dumps(response.json(), indent=4)
         except ValueError:
             is_json = False
+
+    if copy and CLIPBOARD_AVAILABLE:
+        try:
+            pyperclip.copy(body_text)
+            if RICH_AVAILABLE:
+                console.print("[green] Response copied to clipboard.")
+            else:
+                print("Response copied to clipboard")
+        except pyperclip.PyperclipException:
+            pass
 
     if RICH_AVAILABLE:
         color = "green" if response.ok else "red"
